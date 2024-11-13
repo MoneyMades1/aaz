@@ -1,3 +1,4 @@
+------------- Don't Touch the stuff below lol
 local function Notify(message)
     game.StarterGui:SetCore("SendNotification", {
         Title = "AutoFarm Status",
@@ -6,30 +7,30 @@ local function Notify(message)
     })
 end
 
-local function MoveTo(targetPosition)
+local function MoveTo(target)
     local player = game:GetService("Players").LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoidRoot = character:WaitForChild("HumanoidRootPart", 5)
-    local startPosition = humanoidRoot.Position
-    local distance = (targetPosition.Position - startPosition).Magnitude
-    local stepCount = math.ceil(distance / _G.AutoFarmSettings.StepDistance)
-    local direction = (targetPosition.Position - startPosition).Unit
+    local currentPos = humanoidRoot.Position
+    local distance = (target.Position - currentPos).Magnitude
+    local steps = math.ceil(distance / _G.AutoFarmSettings.StepDistance)
+    local direction = (target.Position - currentPos).Unit
 
-    for step = 1, stepCount do
-        local nextPosition = startPosition + direction * _G.AutoFarmSettings.StepDistance
+    for i = 1, steps do
+        local nextPosition = currentPos + direction * _G.AutoFarmSettings.StepDistance
         local initialCFrame = humanoidRoot.CFrame
         local startTime = tick()
 
         while tick() - startTime < _G.AutoFarmSettings.TeleportSmoothness do
             local progress = (tick() - startTime) / _G.AutoFarmSettings.TeleportSmoothness
-            humanoidRoot.CFrame = CFrame.new(initialCFrame.Position:Lerp(nextPosition, progress), targetPosition.Position)
+            humanoidRoot.CFrame = CFrame.new(initialCFrame.Position:Lerp(nextPosition, progress), target.Position)
             task.wait(0.005)
         end
 
-        startPosition = nextPosition
+        currentPos = nextPosition
     end
 
-    humanoidRoot.CFrame = targetPosition
+    humanoidRoot.CFrame = target
 end
 
 local function AutoFarmLoop()
@@ -43,19 +44,15 @@ local function AutoFarmLoop()
     while true do
         local player = game:GetService("Players").LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
-        
-        -- Ensure Humanoid and HumanoidRootPart are available
         local humanoidRoot = character:FindFirstChild("HumanoidRootPart")
-        local humanoid = character:FindFirstChild("Humanoid")
 
-        if not character or not humanoidRoot or not humanoid then
+        if not character or not humanoidRoot then
             task.wait(0.1)
             continue
         end
 
         local closestCoin, closestDistance = nil, math.huge
 
-        -- Find the closest coin
         for _, obj in ipairs(workspace:GetDescendants()) do
             if obj:IsA("Part") and obj.Name == "Coin_Server" and obj.Material == Enum.Material.Plastic then
                 local coinVisual = obj:FindFirstChild("CoinVisual")
@@ -81,10 +78,9 @@ local function AutoFarmLoop()
             task.wait(5)
         end
 
-        -- Check if the candy bag is full
         local candyBagFull = player:WaitForChild("PlayerGui"):WaitForChild("MainGUI"):WaitForChild("Game"):WaitForChild("CoinBags"):WaitForChild("Container"):WaitForChild("Candy"):WaitForChild("Full")
         if candyBagFull and candyBagFull.Visible then
-            humanoid.Health = 0
+            character.Humanoid.Health = 0
         end
 
         task.wait(_G.AutoFarmSettings.ScanInterval)
@@ -94,7 +90,7 @@ end
 local function StartAutoFarm()
     while true do
         AutoFarmLoop()
-        task.wait(5) 
+        task.wait(5)
     end
 end
 
