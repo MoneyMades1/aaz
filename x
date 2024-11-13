@@ -1,3 +1,10 @@
+_G.AutoFarmSettings = {
+    CoinDetectRadius = 500,   -- Radius to detect coins (default: 500)
+    StepDistance = 10,        -- Distance between each teleportation step (use caution)
+    TeleportSmoothness = 0.35, -- Lower value is faster but riskier Higher is Slower And Safer
+    ScanInterval = 0.1        -- checker for coins every 0.1 seconds
+}
+
 ------------- Don't Touch the stuff below lol
 local function Notify(message)
     game.StarterGui:SetCore("SendNotification", {
